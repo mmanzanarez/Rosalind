@@ -1,0 +1,105 @@
+import sys
+
+def fastaRead(filename):
+    """This reads the Rosalind file and turns the sequences into a list"""
+    fasta = {}
+    with open(filename, "r") as file_one:
+        for line in file_one:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith(">"):
+                active_sequence_name = line[1:]
+                if active_sequence_name not in fasta:
+                    fasta[active_sequence_name] = []
+                continue
+            sequence = line
+            fasta[active_sequence_name].append(sequence)
+        numberDictKey = len(fasta)
+        numberOfValueInKey = 0
+        singleDna = ""
+        for numberDictKey in fasta:
+            valuesInKey = fasta[numberDictKey]
+            numberOfValueInKey = len(valuesInKey)
+
+            for numberOfValueInKey in valuesInKey:
+                singleDna += numberOfValueInKey
+
+                fasta[numberDictKey] = singleDna
+            singleDna = ""
+    return fasta
+
+def make_kmers (k, string):
+	Kmers = []
+	for i in range (len(string) - k + 1 ):
+		Kmers.append (string [i : i+k])
+	return Kmers
+
+rosalindDict = fastaRead(filename)
+print rosalindDict
+
+#Get the shortest sequence from Rosalind and it's length
+shortestSequenceLength = sys.maxint
+shortestSequence = ''
+for i in rosalindDict:
+    if shortestSequenceLength >= len(rosalindDict[i]):
+        shortestSequenceLength = len(rosalindDict[i])
+        shortestSequence = rosalindDict[i]
+
+#Remove the shortest sequence from Rosalind
+for k, i in rosalindDict.items():
+    if i is shortestSequence:
+        del rosalindDict[k]
+
+#Create kmer for the shortest sequence and it's default length
+kmerShortestSequence = (make_kmers(shortestSequenceLength, shortestSequence))
+
+#Compare the shortest kmer to the first long sequece and it's Kmers from the Rosaling Dictionary
+def checkForShortestKmer(kmerShort, rosalindDictionary, shortestLength, matchingValue):
+    matchOrNoMatchList = []
+    atLeastOneMatch = "false"
+    firstAttempt = "true"
+
+    #Compare the shortest kmer to all of the other long sequeces and it's Kmers from the Rosaling Dictionary
+    for valueOfShortKmer in kmerShort:
+        if (firstAttempt == "true"):
+            for valueOfLongSequene in rosalindDictionary:
+                if (atLeastOneMatch == "true" or firstAttempt == "true"):
+                    firstAttempt = "false"
+                    kmerLongSequence = (make_kmers(shortestLength, rosalindDictionary[valueOfLongSequene]))
+                    for valueOfLongKmer in kmerLongSequence:
+                        if valueOfShortKmer == valueOfLongKmer:
+                            matchOrNoMatchList.append("true")
+                        else:
+                            matchOrNoMatchList.append("false")
+                    if "true" in matchOrNoMatchList:
+                        atLeastOneMatch = "true"
+                        matchingValue = valueOfShortKmer
+                        del matchOrNoMatchList[:]
+                    else:
+                        atLeastOneMatch = "false"
+                        del matchOrNoMatchList[:]
+        if(atLeastOneMatch == "true"):
+            return atLeastOneMatch, matchingValue
+        if(atLeastOneMatch == "false"):
+            firstAttempt = "true"
+    return atLeastOneMatch, matchingValue
+
+
+
+matchingValue = ""
+atLeastOneMatch = checkForShortestKmer(kmerShortestSequence,rosalindDict,shortestSequenceLength, matchingValue)
+print atLeastOneMatch
+print shortestSequenceLength
+
+while (atLeastOneMatch[0] == "false"):
+    shortestSequenceLength -= 1
+    kmerShortestSequence = (make_kmers(shortestSequenceLength, shortestSequence))
+    atLeastOneMatch = checkForShortestKmer(kmerShortestSequence, rosalindDict, shortestSequenceLength, matchingValue)
+    print atLeastOneMatch
+    print shortestSequenceLength
+
+if (atLeastOneMatch[0] == "true"):
+    with open("/Users/RJ/Desktop/answer.txt", 'w') as f:
+        f.write('{}'.format(atLeastOneMatch[1]) + '\n')
+        print "Writing " + atLeastOneMatch[1] + " to the answer.txt"
