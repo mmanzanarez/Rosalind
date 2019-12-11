@@ -1,7 +1,7 @@
 import sys
 
 def fastaRead(filename):
-    """This reads the Rosalind file and turns the sequences into a list"""
+    """This reads the DISCOVER-Seq file and turns the sequences into a list"""
     fasta = {}
     with open(filename, "r") as file_one:
         for line in file_one:
@@ -35,27 +35,27 @@ def make_kmers (k, string):
 		Kmers.append (string [i : i+k])
 	return Kmers
 
-rosalindDict = fastaRead(filename)
-print rosalindDict
+DISCOVERSeqDict = fastaRead(filename)
+print DISCOVERSeqDict
 
-#Get the shortest sequence from Rosalind and it's length
+#Get the shortest sequence from DISCOVERSeq and it's length
 shortestSequenceLength = sys.maxint
 shortestSequence = ''
-for i in rosalindDict:
-    if shortestSequenceLength >= len(rosalindDict[i]):
-        shortestSequenceLength = len(rosalindDict[i])
-        shortestSequence = rosalindDict[i]
+for i in DISCOVERSeqDict:
+    if shortestSequenceLength >= len(DISCOVERSeqDict[i]):
+        shortestSequenceLength = len(DISCOVERSeqDict[i])
+        shortestSequence = DISCOVERSeqDict[i]
 
-#Remove the shortest sequence from Rosalind
-for k, i in rosalindDict.items():
+#Remove the shortest sequence from DISCOVERSeq
+for k, i in DISCOVERSeqDict.items():
     if i is shortestSequence:
-        del rosalindDict[k]
+        del DISCOVERSeqDict[k]
 
 #Create kmer for the shortest sequence and it's default length
 kmerShortestSequence = (make_kmers(shortestSequenceLength, shortestSequence))
 
 #Compare the shortest kmer to the first long sequece and it's Kmers from the Rosaling Dictionary
-def checkForShortestKmer(kmerShort, rosalindDictionary, shortestLength, matchingValue):
+def checkForShortestKmer(kmerShort, DISCOVERSeqDictionary, shortestLength, matchingValue):
     matchOrNoMatchList = []
     atLeastOneMatch = "false"
     firstAttempt = "true"
@@ -63,10 +63,10 @@ def checkForShortestKmer(kmerShort, rosalindDictionary, shortestLength, matching
     #Compare the shortest kmer to all of the other long sequeces and it's Kmers from the Rosaling Dictionary
     for valueOfShortKmer in kmerShort:
         if (firstAttempt == "true"):
-            for valueOfLongSequene in rosalindDictionary:
+            for valueOfLongSequene in DISCOVERSeqDictionary:
                 if (atLeastOneMatch == "true" or firstAttempt == "true"):
                     firstAttempt = "false"
-                    kmerLongSequence = (make_kmers(shortestLength, rosalindDictionary[valueOfLongSequene]))
+                    kmerLongSequence = (make_kmers(shortestLength, DISCOVERSeqDictionary[valueOfLongSequene]))
                     for valueOfLongKmer in kmerLongSequence:
                         if valueOfShortKmer == valueOfLongKmer:
                             matchOrNoMatchList.append("true")
@@ -88,14 +88,14 @@ def checkForShortestKmer(kmerShort, rosalindDictionary, shortestLength, matching
 
 
 matchingValue = ""
-atLeastOneMatch = checkForShortestKmer(kmerShortestSequence,rosalindDict,shortestSequenceLength, matchingValue)
+atLeastOneMatch = checkForShortestKmer(kmerShortestSequence,DISCOVERSeqDict,shortestSequenceLength, matchingValue)
 print atLeastOneMatch
 print shortestSequenceLength
 
 while (atLeastOneMatch[0] == "false"):
     shortestSequenceLength -= 1
     kmerShortestSequence = (make_kmers(shortestSequenceLength, shortestSequence))
-    atLeastOneMatch = checkForShortestKmer(kmerShortestSequence, rosalindDict, shortestSequenceLength, matchingValue)
+    atLeastOneMatch = checkForShortestKmer(kmerShortestSequence, DISCOVERSeqDict, shortestSequenceLength, matchingValue)
     print atLeastOneMatch
     print shortestSequenceLength
 
